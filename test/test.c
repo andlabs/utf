@@ -396,6 +396,80 @@ void TestUTF8RuneCount(void)
 
 // TODO why is there a generic utf8.ValidRune()? check utf16 too
 
+struct encodeUTF16Test {
+	uint32_t in[20];
+	size_t nIn;
+	const char *str;
+	uint16_t out[20];
+	size_t nOut;
+};
+
+const struct encodeUTF16Test encodeUTF16Tests[] = {
+	{ { 1, 2, 3, 4 }, 4,
+		"{ 1, 2, 3, 4 }",
+		{ 1, 2, 3, 4 }, 4 },
+	{ { 0xffff, 0x10000, 0x10001, 0x12345, 0x10ffff }, 5,
+		"{ 0xffff, 0x10000, 0x10001, 0x12345, 0x10ffff }",
+		{ 0xffff, 0xd800, 0xdc00, 0xd800, 0xdc01, 0xd808, 0xdf45, 0xdbff, 0xdfff }, 9, },
+	{ { 0x61, 0x62, 0xd7ff, 0xd800, 0xdfff, 0xe000, 0x110000, 0xFFFFFFFF }, 8,
+		"{ 0x61, 0x62, 0xd7ff, 0xd800, 0xdfff, 0xe000, 0x110000, 0xFFFFFFFF }",
+		{ 0x61, 0x62, 0xd7ff, 0xfffd, 0xfffd, 0xe000, 0xfffd, 0xfffd }, 8 },
+	{ { 0 }, 0, NULL, { 0 }, 0 },
+};
+
+void TestUTF16Encode(void)
+{
+	const struct encodeUTF16Test *u;
+	int selfFailed = 0;
+	uint16_t buf[2];
+	size_t n;
+	size_t i, j;
+	int iterFailed = 0;
+
+	for (u = encodeUTF16Tests; u->str != NULL; u++) {
+		iterFailed = 0;
+		j = 0;
+		for (i = 0; i < u->nIn; i++) {
+			n = utf16EncodeRune(u->in[i], buf);
+			if ((j + n) > u->nOut) {
+				printf("TestUTF16Encode %s: overflow at input %zd\n",
+					u->str, i);
+				iterFailed = 1;
+				break;
+			}
+			if (buf[0] != u->out[j]) {
+				printf("TestUTF16Encode %s: input %zd output %zd wrong: expected 0x%" PRIX16 ", got 0x%" PRIX16 "\n",
+					u->str, i, j, u->out[j], buf[0]);
+				iterFailed = 1;
+				break;
+			}
+			j++;
+			if (n == 1)
+				continue;
+			if (buf[1] != u->out[j]) {
+				printf("TestUTF16Encode %s: input %zd output %zd (second half of pair) wrong: expected 0x%" PRIX16 ", got 0x%" PRIX16 "\n",
+					u->str, i, j, u->out[j], buf[1]);
+				iterFailed = 1;
+				break;
+			}
+			j++;
+		}
+		if (j != u->nOut) {
+			printf("TestUTF16Encode %s: underflow: expected %zd points, got %zd\n",
+				u->str, u->nOut, j);
+			iterFailed = 1;
+			// and fall through
+		}
+		if (iterFailed) {
+			failed = 1;
+			selfFailed = 1;
+			continue;
+		}
+		verbosef("TestUTF16Encode %s: pass\n", u->str);
+	}
+	passfail(selfFailed, "TestUTF16Encode");
+}
+
 int main(int argc, char *argv[])
 {
 	verbose = (argc > 1) &&
@@ -409,6 +483,8 @@ int main(int argc, char *argv[])
 	TestUTF8DecodeInvalidSequence();
 	TestUTF8NegativeRune();
 	TestUTF8RuneCount();
+
+	TestUTF16Encode();
 
 	if (failed) {
 		printf("some tests failed\n");
