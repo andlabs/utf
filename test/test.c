@@ -6,6 +6,7 @@
 #include "../utf.h"
 
 // TODO make sure everything checks both the 0 and not-0 element count versions
+// TODO simplify all of these anyway
 
 #define RUNEFMT "0x%08" PRIX32
 
@@ -417,6 +418,7 @@ const struct encodeUTF16Test encodeUTF16Tests[] = {
 	{ { 0 }, 0, NULL, { 0 }, 0 },
 };
 
+// This combines TestEncode and TestEncodeRune from the original Go unicode/utf16 tests because they overlap to some extent (but the Go functions operate differently enough that they are separate tests).
 void TestUTF16Encode(void)
 {
 	const struct encodeUTF16Test *u;
@@ -425,12 +427,32 @@ void TestUTF16Encode(void)
 	size_t n;
 	size_t i, j;
 	int iterFailed = 0;
+	uint32_t rune;
+	const uint16_t *b2;
 
 	for (u = encodeUTF16Tests; u->str != NULL; u++) {
 		iterFailed = 0;
 		j = 0;
 		for (i = 0; i < u->nIn; i++) {
 			n = utf16EncodeRune(u->in[i], buf);
+
+			// this is the only part unique to Go's TestEncodeRune
+			if (u->in[i] >= 0x10000 && u->in[i] <= 0x10FFFF) {
+				b2 = utf16DecodeRune(buf, n, &rune);
+				if (rune != u->in[i]) {
+					printf("TestUTF16Encode %s: re-encode of input %zd: wrong rune: wanted " RUNEFMT ", got " RUNEFMT "\n",
+						u->str, i, u->in[i], rune);
+					iterFailed = 1;
+					break;
+				}
+				if (((size_t) (b2 - buf)) != n) {
+					printf("TestUTF16Encode %s: re-encode of input %zd: wrong length: expected %zd got %td\n",
+						u->str, i, n, b2 - buf);
+					iterFailed = 1;
+					break;
+				}
+			}
+
 			if ((j + n) > u->nOut) {
 				printf("TestUTF16Encode %s: overflow at input %zd\n",
 					u->str, i);
@@ -470,6 +492,116 @@ void TestUTF16Encode(void)
 	passfail(selfFailed, "TestUTF16Encode");
 }
 
+struct decodeUTF16Test {
+	uint16_t in[20];
+	size_t nIn;
+	const char *str;
+	uint32_t out[20];
+	size_t nOut;
+};
+
+const struct decodeUTF16Test decodeUTF16Tests[] = {
+	{ { 1, 2, 3, 4 }, 4,
+		"{ 1, 2, 3, 4 }",
+		{ 1, 2, 3, 4 }, 4 },
+	{ { 0xffff, 0xd800, 0xdc00, 0xd800, 0xdc01, 0xd808, 0xdf45, 0xdbff, 0xdfff }, 9,
+		"{ 0xffff, 0xd800, 0xdc00, 0xd800, 0xdc01, 0xd808, 0xdf45, 0xdbff, 0xdfff }",
+		{ 0xffff, 0x10000, 0x10001, 0x12345, 0x10ffff }, 5 },
+	{ { 0xd800, 0x61 }, 2,
+		"{ 0xd800, 0x61 }",
+		{ 0xfffd, 0x61 }, 2 },
+	{ { 0xdfff }, 1,
+		"{ 0xdfff }",
+		{ 0xfffd }, 1 },
+	{ { 0 }, 0, NULL, { 0 }, 0 },
+};
+
+void TestUTF16Decode(void)
+{
+	const struct decodeUTF16Test *u;
+	int selfFailed = 0;
+	const uint16_t *b, *b2;
+	uint32_t rune;
+	size_t i, j;
+	int iterFailed = 0;
+
+	for (u = decodeUTF16Tests; u->str != NULL; u++) {
+		iterFailed = 0;
+		i = 0;
+		j = 0;
+		b = u->in;
+		while (i < u->nIn) {
+			b2 = utf16DecodeRune(b, u->nIn - i, &rune);
+			if ((j + 1) > u->nOut) {
+				printf("TestUTF16Decode %s: overflow at input %zd\n",
+					u->str, i);
+				iterFailed = 1;
+				break;
+			}
+			if (rune != u->out[j]) {
+				printf("TestUTF16Decode %s: input %zd output %zd wrong: expected " RUNEFMT ", got " RUNEFMT "\n",
+					u->str, i, j, u->out[j], rune);
+				iterFailed = 1;
+				break;
+			}
+			j++;
+			i += b2 - b;
+			b = b2;
+		}
+		if (j != u->nOut) {
+			printf("TestUTF16Decode %s: underflow: expected %zd runes, got %zd\n",
+				u->str, u->nOut, j);
+			iterFailed = 1;
+			// and fall through
+		}
+		if (iterFailed) {
+			failed = 1;
+			selfFailed = 1;
+			continue;
+		}
+		verbosef("TestUTF16Decode %s: pass\n", u->str);
+	}
+	passfail(selfFailed, "TestUTF16Decode");
+}
+
+struct decodeUTF16RuneTest {
+	uint16_t r[2];
+	const char *str;
+	uint32_t want;
+};
+
+const struct decodeUTF16RuneTest decodeUTF16RuneTests[] = {
+	{ { 0xd800, 0xdc00 }, "{ 0xd800, 0xdc00 }", 0x10000 },
+	{ { 0xd800, 0xdc01 }, "{ 0xd800, 0xdc01 }", 0x10001 },
+	{ { 0xd808, 0xdf45 }, "{ 0xd808, 0xdf45 }", 0x12345 },
+	{ { 0xdbff, 0xdfff }, "{ 0xdbff, 0xdfff }", 0x10ffff },
+	{ { 0xd800, 0x61 }, "{ 0xd800, 0x61 }", 0xfffd },		// illegal, replacement rune substituted
+	{ { 0 }, NULL, 0 },
+};
+
+void TestUTF16DecodeRune(void)
+{
+	const struct decodeUTF16RuneTest *u;
+	int selfFailed = 0;
+	uint32_t rune;
+
+	for (u = decodeUTF16RuneTests; u->str != NULL; u++) {
+		utf16DecodeRune(u->r, 2, &rune);
+		if (rune != u->want) {
+			printf("TestUTF16DecodeRune %s: wrong rune: wanted " RUNEFMT ", got " RUNEFMT "\n",
+				u->str, u->want, rune);
+			failed = 1;
+			selfFailed = 1;
+			continue;
+		}
+		// TODO test the return is correct?
+		verbosef("TestUTF16DecodeRune %s: pass\n", u->str);
+	}
+	passfail(selfFailed, "TestUTF16DecodeRune");
+}
+
+// TODO utf16IsSurrogate()?
+
 int main(int argc, char *argv[])
 {
 	verbose = (argc > 1) &&
@@ -485,6 +617,8 @@ int main(int argc, char *argv[])
 	TestUTF8RuneCount();
 
 	TestUTF16Encode();
+	TestUTF16Decode();
+	TestUTF16DecodeRune();
 
 	if (failed) {
 		printf("some tests failed\n");
