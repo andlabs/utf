@@ -88,6 +88,23 @@ void wrongUTF8Output(const struct utf8map *u, char *buf, const char *func)
 	failed = 1;
 }
 
+int mustBeInvalid(uint32_t orig, uint32_t rune, ptrdiff_t off, const char *func, const char *context)
+{
+	if (rune != 0xFFFD) {
+		printf("%s " RUNEFMT "%s: wrong rune: expected 0xFFFD, got " RUNEFMT "\n",
+			func, orig, context, rune);
+		failed = 1;
+		return 0;
+	}
+	if (off != 1) {
+		printf("%s " RUNEFMT "%s: wrong size: expected 1, got %td\n",
+			func, orig, context, off);
+		failed = 1;
+		return 0;
+	}
+	return 1;
+}
+
 // TODO add a utf8IsRune()?
 
 void TestUTF8EncodeRune(void)
@@ -165,17 +182,7 @@ void TestUTF8DecodeRune(void)
 		// note that we skip this part if the size is 1 because a size of 0 means "assume null terminated"
 		if (u->n != 1) {
 			end = utf8DecodeRune(buf, u->n - 1, &rune);
-			if (rune != 0xFFFD) {
-				printf("TestUTF8DecodeRune " RUNEFMT " incomplete sequence: wrong rune: expected 0xFFFD, got " RUNEFMT "\n",
-					u->rune, rune);
-				failed = 1;
-				selfFailed = 1;
-				continue;
-			}
-			if (end - buf != 1) {
-				printf("TestUTF8DecodeRune " RUNEFMT " incomplete sequence: wrong size: expected 1, got %td\n",
-					u->rune, end - buf);
-				failed = 1;
+			if (!mustBeInvalid(u->rune, rune, end - buf, "TestUTF8DecodeRune", " incomplete sequence")) {
 				selfFailed = 1;
 				continue;
 			}
@@ -187,17 +194,7 @@ void TestUTF8DecodeRune(void)
 		else
 			buf[u->n - 1] = (char) ((uint8_t) 0x7F);
 		end = utf8DecodeRune(buf, u->n - 1, &rune);
-		if (rune != 0xFFFD) {
-			printf("TestUTF8DecodeRune " RUNEFMT " invalid sequence: wrong rune: expected 0xFFFD, got " RUNEFMT "\n",
-				u->rune, rune);
-			failed = 1;
-			selfFailed = 1;
-			continue;
-		}
-		if (end - buf != 1) {
-			printf("TestUTF8DecodeRune " RUNEFMT " invalid sequence: wrong size: expected 1, got %td\n",
-				u->rune, end - buf);
-			failed = 1;
+		if (!mustBeInvalid(u->rune, rune, end - buf, "TestUTF8DecodeRune", " invalid sequence")) {
 			selfFailed = 1;
 			continue;
 		}
@@ -205,6 +202,34 @@ void TestUTF8DecodeRune(void)
 		verbosef("TestUTF8DecodeRune " RUNEFMT ": pass\n", u->rune);
 	}
 	passfail(selfFailed, "TestUTF8DecodeRune");
+}
+
+void TestUTF8DecodeSurrogateRune(void)
+{
+	int selfFailed = 0;
+	char buf[3];
+	const char *end;
+	uint32_t rune;
+
+	buf[0] = (char) ((uint8_t) 0xed);
+	buf[1] = (char) ((uint8_t) 0xa0);
+	buf[2] = (char) ((uint8_t) 0x80);
+	end = utf8DecodeRune(buf, 3, &rune);
+	if (!mustBeInvalid(0xd800, rune, end - buf, "TestUTF8DecodeSurrogateRune", " { 0xed, 0xa0, 0x80 }"))
+		selfFailed = 1;
+	else
+		verbosef("TestUTF8DecodeSurrogateRune " RUNEFMT " { 0xed, 0xa0, 0x80 }: pass\n", 0xd800);
+
+	buf[0] = (char) ((uint8_t) 0xed);
+	buf[1] = (char) ((uint8_t) 0xbf);
+	buf[2] = (char) ((uint8_t) 0xbf);
+	end = utf8DecodeRune(buf, 3, &rune);
+	if (!mustBeInvalid(0xdfff, rune, end - buf, "TestUTF8DecodeSurrogateRune", " { 0xed, 0xbf, 0xbf }"))
+		selfFailed = 1;
+	else
+		verbosef("TestUTF8DecodeSurrogateRune " RUNEFMT " { 0xed, 0xbf, 0xbf }: pass\n", 0xdfff);
+
+	passfail(selfFailed, "TestUTF8DecodeSurrogateRune");
 }
 
 int main(int argc, char *argv[])
@@ -216,6 +241,7 @@ int main(int argc, char *argv[])
 
 	TestUTF8EncodeRune();
 	TestUTF8DecodeRune();
+	TestUTF8DecodeSurrogateRune();
 
 	if (failed) {
 		printf("some tests failed\n");
