@@ -130,8 +130,79 @@ void TestUTF8DecodeRune(void)
 {
 	const struct utf8map *u;
 	int selfFailed = 0;
+	char buf[4];
+	const char *end;
+	uint32_t rune;
 
 	for (u = utf8map; u->rune != 0xFFFFFFFF; u++) {
+		// TODO get rid of the need for all this casting
+		buf[0] = (char) (u->expected[0]);
+		if (u->n > 1)
+			buf[1] = (char) (u->expected[1]);
+		if (u->n > 2)
+			buf[2] = (char) (u->expected[2]);
+		if (u->n > 3)
+			buf[3] = (char) (u->expected[3]);
+
+		end = utf8DecodeRune(buf, u->n, &rune);
+		if (rune != u->rune) {
+			printf("TestUTF8DecodeRune " RUNEFMT ": wrong rune: got " RUNEFMT "\n",
+				u->rune, rune);
+			selfFailed = 1;
+			continue;
+		}
+		if ((size_t) (end - buf) != u->n) {
+			printf("TestUTF8DecodeRune " RUNEFMT ": wrong size: expected %zd, got %td\n",
+				u->rune, u->n, end - buf);
+			failed = 1;
+			selfFailed = 1;
+			continue;
+		}
+
+		// TODO "there's an extra byte that bytes left behind - make sure trailing byte works"
+
+		// see if not enough bytes gets handled properly
+		// note that we skip this part if the size is 1 because a size of 0 means "assume null terminated"
+		if (u->n != 1) {
+			end = utf8DecodeRune(buf, u->n - 1, &rune);
+			if (rune != 0xFFFD) {
+				printf("TestUTF8DecodeRune " RUNEFMT " incomplete sequence: wrong rune: expected 0xFFFD, got " RUNEFMT "\n",
+					u->rune, rune);
+				failed = 1;
+				selfFailed = 1;
+				continue;
+			}
+			if (end - buf != 1) {
+				printf("TestUTF8DecodeRune " RUNEFMT " incomplete sequence: wrong size: expected 1, got %td\n",
+					u->rune, end - buf);
+				failed = 1;
+				selfFailed = 1;
+				continue;
+			}
+		}
+
+		// corrupt the sequence and see if it fails
+		if (u->n == 1)
+			buf[0] = (char) ((uint8_t) 0x80);
+		else
+			buf[u->n - 1] = (char) ((uint8_t) 0x7F);
+		end = utf8DecodeRune(buf, u->n - 1, &rune);
+		if (rune != 0xFFFD) {
+			printf("TestUTF8DecodeRune " RUNEFMT " invalid sequence: wrong rune: expected 0xFFFD, got " RUNEFMT "\n",
+				u->rune, rune);
+			failed = 1;
+			selfFailed = 1;
+			continue;
+		}
+		if (end - buf != 1) {
+			printf("TestUTF8DecodeRune " RUNEFMT " invalid sequence: wrong size: expected 1, got %td\n",
+				u->rune, end - buf);
+			failed = 1;
+			selfFailed = 1;
+			continue;
+		}
+
+		verbosef("TestUTF8DecodeRune " RUNEFMT ": pass\n", u->rune);
 	}
 	passfail(selfFailed, "TestUTF8DecodeRune");
 }
