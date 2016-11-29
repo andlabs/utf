@@ -1,3 +1,4 @@
+// utf by pietro gagliardi (andlabs) — https://github.com/andlabs/utf/
 // 10 november 2016
 #include "utf.h"
 
