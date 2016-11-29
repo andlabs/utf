@@ -2,12 +2,114 @@
 
 `utf` is a set of functions for dealing with UTF-8 and UTF-16 text.
 
-`utf` is shipped as just one `.c` file and one `.h` file, so it can be integrated into any project with ease. Both files are written in standard C99, with no implementation-specific behavior, and should be completely portable. TODO behavior about invalid input
+`utf` is shipped as just one `.c` file and one `.h` file, so it can be integrated into any project with ease.
 
-TODO this is way too awkward
+`utf` is written in standard C99, making it fully portable.
+
+`utf` is intended to have fully defined and consistent behavior across platforms, including graceful handling of invalid input (so no error codes!).
+
+On the flipside, this means `utf` might not perform optimally. I have yet to run benchmarks, though.
+
+The design of `utf` is based on Go's `unicode/utf8` and `unicode/utf16` packages, however it does not use any of Go's code.
 
 ## Documentation
-TODO
+This library calls Unicode codepoints *runes*.
+
+### `utf8EncodeRune()`
+```c
+size_t utf8EncodeRune(uint32_t rune, char *encoded);
+```
+`utf8EncodeRune()` encodes the given rune as UTF-8 into `encoded`, returning the number of bytes encoded. `encoded` must be at least 4 bytes long. If the given rune cannot be encoded (for instance, if it is invalid or is a surrogate half), U+FFFD is encoded.
+
+### `utf8DecodeRune()`
+```c
+const char *utf8DecodeRune(const char *s, size_t nElem, uint32_t *rune);
+```
+`utf8DecodeRune()` takes the UTF-8 sequence in `s` and decodes its first rune into `rune`. It returns a pointer to the start of the next rune.
+
+If `nElem` is 0, `s` is assumed to be a C string and terminated with `'\0'`. If `nElem` is nonzero, `s` is assumed to be a fixed-size buffer of size `nElem`; `'\0'` characters will be encoded like other characters in this case.
+
+If the first byte of `s` results in an invalid UTF-8 sequence, U+FFFD is stored in `rune` and the returned pointer is offset by *one*. So, for instance, if we pass in the invalid
+
+```
+EF BF 20
+^
+```
+
+then the `EF` will be decoded as U+FFFD and a pointer to `BF` is returned:
+
+```
+EF BF 20
+   ^
+```
+
+If you run `utf8DecodeRune()` again, the `BF` will also become U+FFFD. Keep this in mind.
+
+### `utf16EncodeRune()`
+```c
+size_t utf16EncodeRune(uint32_t rune, uint16_t *encoded);
+```
+`utf16EncodeRune()` encodes the given rune as UTF-16 into `encoded`, returning the number of `uint16_t`s encoded. `encoded` must be at least 2 elements long. If the given rune cannot be encoded (for instance, if it is invalid or is a surrogate half), U+FFFD is encoded.
+
+### `utf16DecodeRune()`
+```c
+const uint16_t *utf16DecodeRune(const uint16_t *s, size_t nElem, uint32_t *rune);
+```
+`utf16DecodeRune()` takes the UTF-16 sequence in `s` and decodes its first rune into `rune`. It returns a pointer to the start of the next rune.
+
+If `nElem` is 0, `s` is assumed to be a C string and terminated with `L'\0'`. If `nElem` is nonzero, `s` is assumed to be a fixed-size buffer of size `nElem` (in elements, not bytes!); `L'\0'` characters will be encoded like other characters in this case.
+
+If the first element of `s` results in an invalid UTF-16 sequence, U+FFFD is stored in `rune` and the returned pointer is offset by *one*. So, for instance, if we pass in the invalid
+
+```
+FDEF F987 0020
+^
+```
+
+then the `FDEF` will be decoded as U+FFFD and a pointer to `F987` is returned:
+
+```
+FDEF F987 0020
+     ^
+```
+
+If you run `utf16DecodeRune()` again, the `F987` will also become U+FFFD. Keep this in mind.
+
+### `utf8RuneCount()`
+```c
+size_t utf8RuneCount(const char *s, size_t nElem);
+```
+`utf8RuneCount()` returns the number of runes in `s`, following the same rules as `utf8DecoeRune()`. This function runs in O(N) time.
+
+### `utf8UTF16Count()`
+```c
+size_t utf8UTF16Count(const char *s, size_t nElem);
+```
+`utf8UTF16Count()` returns the number of elements (`uint16_t`s) needed to convert `s` from UTF-8 to UTF-16, following the same rules as `utf8DecodeRune()` and `utf16EncodeRune()`. This function runs in O(N) time.
+
+### `utf16RuneCount()`
+```c
+size_t utf16RuneCount(const uint16_t *s, size_t nElem);
+```
+`utf16RuneCount()` returns the number of runes in `s`, following the same rules as `utf16DecoeRune()`. This function runs in O(N) time.
+
+### `utf16UTF8Count()`
+```c
+size_t utf16UTF8Count(const uint16_t *s, size_t nElem);
+```
+`utf16UTF8Count()` returns the number of bytes needed to convert `s` from UTF-16 to UTF-8, following the same rules as `utf16DecodeRune()` and `utf8EncodeRune()`. This function runs in O(N) time.
+
+## Contributing
+Welcome.
+
+## TODOs
+- Add a utf8IsValid()/utf16IsValid()?
+	- Add a utf8IsFull()/utf16IsFull()?
+- Add a utf8RuneEncodedLength()/utf16RuneEncodedLength()?
+- Add a utf16IsSurrogate()? utfValidRune()? named rune constants?
+- Fix remaining MSVC warnings
+- Is `wchar_t` on MSVC signed? Because I need to cast to use these functions on a `WCHAR`
+- Write a real test suite sometime
 
 ## Background
 This came about when I was planning the text event system of [libui](https://github.com/andlabs/libui). Windows and OS X both use UTF-16 for its internal string data types; however, libui uses UTF-8 for all text strings. I got away with it so far because I either only needed to convert entire strings or I decided to use grapheme cluster boundaries instead of byte or codepoint offsets. However, this broke apart with the text handling system, since I have to allow attributed strings to be manipulated after they were made. Therefore, I needed to be able to build tables of mappings between UTF-8 byte offsets and UTF-16 array indices. Building such loops with OS-specific APIs introduces a number of pain points, such as what to do about API error codes and what to do about invalid byte sequences.
