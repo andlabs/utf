@@ -1,4 +1,5 @@
 // 30 november 2016
 #include <stdint.h>
 
-extern uint64_t bench(void (*f)(int64_t n));
+typedef void (*benchFunc)(int64_t n);
+extern uint64_t bench(benchFunc f);

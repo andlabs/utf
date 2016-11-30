@@ -7,7 +7,7 @@
 typedef struct B B;
 
 struct B {
-	void (*f)(int64_t n);
+	benchFunc f;
 	LARGE_INTEGER duration;
 	LARGE_INTEGER qpf;
 	int64_t n;
@@ -58,7 +58,7 @@ static void runN(B *b, int64_t n)
 	b->duration.QuadPart += end.QuadPart - start.QuadPart;
 }
 
-uint64_t bench(void (*f)(int64_t n))
+uint64_t bench(benchFunc f)
 {
 	B b;
 	LARGE_INTEGER qpf;
@@ -94,7 +94,10 @@ uint64_t bench(void (*f)(int64_t n))
 	res = b->duration.QuadPart;
 	res *= 1000000000;
 
-	// and finally convert from nanocounts to seconds == naonseconds
+	// and convert from nanocounts to seconds == naonseconds
 	// thanks to ValleyBell for help
-	return res / b->qpf.QuadPart;
+	res /= b->qpf.QuadPart;
+
+	// and finally from nanoseconds for all to nanoseconds per one
+	return res / b->n;
 }
