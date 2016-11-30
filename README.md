@@ -27,7 +27,7 @@ const char *utf8DecodeRune(const char *s, size_t nElem, uint32_t *rune);
 ```
 `utf8DecodeRune()` takes the UTF-8 sequence in `s` and decodes its first rune into `rune`. It returns a pointer to the start of the next rune.
 
-If `nElem` is 0, `s` is assumed to be a C string and terminated with `'\0'`. If `nElem` is nonzero, `s` is assumed to be a fixed-size buffer of size `nElem`; `'\0'` characters will be encoded like other characters in this case.
+`nElem` is the size of `s`; if `nElem` is 0, `s` is assumed to be large enough. Use this for C-style strings terminated with a `'\0'`.
 
 If the first byte of `s` results in an invalid UTF-8 sequence, U+FFFD is stored in `rune` and the returned pointer is offset by *one*. So, for instance, if we pass in the invalid
 
@@ -57,7 +57,7 @@ const uint16_t *utf16DecodeRune(const uint16_t *s, size_t nElem, uint32_t *rune)
 ```
 `utf16DecodeRune()` takes the UTF-16 sequence in `s` and decodes its first rune into `rune`. It returns a pointer to the start of the next rune.
 
-If `nElem` is 0, `s` is assumed to be a C string and terminated with `L'\0'`. If `nElem` is nonzero, `s` is assumed to be a fixed-size buffer of size `nElem` (in elements, not bytes!); `L'\0'` characters will be encoded like other characters in this case.
+`nElem` is the size of `s`; if `nElem` is 0, `s` is assumed to be large enough. Use this for C-style strings terminated with a `L'\0'`.
 
 If the first element of `s` results in an invalid UTF-16 sequence, U+FFFD is stored in `rune` and the returned pointer is offset by *one*. So, for instance, if we pass in the invalid
 
@@ -81,11 +81,15 @@ size_t utf8RuneCount(const char *s, size_t nElem);
 ```
 `utf8RuneCount()` returns the number of runes in `s`, following the same rules as `utf8DecoeRune()`. This function runs in O(N) time.
 
+If `nElem` is 0, `utf8RuneCount()` stops at a `'\0'` (which is not included in the count); otherwise, it stops after `nElem` elements.
+
 ### `utf8UTF16Count()`
 ```c
 size_t utf8UTF16Count(const char *s, size_t nElem);
 ```
 `utf8UTF16Count()` returns the number of elements (`uint16_t`s) needed to convert `s` from UTF-8 to UTF-16, following the same rules as `utf8DecodeRune()` and `utf16EncodeRune()`. This function runs in O(N) time.
+
+If `nElem` is 0, `utf8UTF16Count()` stops at a `'\0'` (which is not included in the count); otherwise, it stops after `nElem` elements.
 
 ### `utf16RuneCount()`
 ```c
@@ -93,11 +97,15 @@ size_t utf16RuneCount(const uint16_t *s, size_t nElem);
 ```
 `utf16RuneCount()` returns the number of runes in `s`, following the same rules as `utf16DecoeRune()`. This function runs in O(N) time.
 
+If `nElem` is 0, `utf16RuneCount()` stops at a `L'\0'` (which is not included in the count); otherwise, it stops after `nElem` elements.
+
 ### `utf16UTF8Count()`
 ```c
 size_t utf16UTF8Count(const uint16_t *s, size_t nElem);
 ```
 `utf16UTF8Count()` returns the number of bytes needed to convert `s` from UTF-16 to UTF-8, following the same rules as `utf16DecodeRune()` and `utf8EncodeRune()`. This function runs in O(N) time.
+
+If `nElem` is 0, `utf16UTF8Count()` stops at a `L'\0'` (which is not included in the count); otherwise, it stops after `nElem` elements.
 
 ## Contributing
 Welcome.
