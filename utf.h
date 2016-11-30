@@ -23,4 +23,38 @@ extern size_t utf16UTF8Count(const uint16_t *s, size_t nElem);
 
 #ifdef __cplusplus
 }
+
+// Provide overloads on Windows for using these functions with wchar_t and WCHAR when wchar_t is a keyword in C++ mode (the default).
+// Otherwise, you'd need to cast to pass a wchar_t pointer, WCHAR pointer, or equivalent to these functions.
+// TODO check this on MinGW-w64
+// TODO check this under /Wall
+// TODO C-style casts enough? or will that fail in /Wall?
+// TODO same for UniChar/unichar on Mac?
+#if defined(_MSC_VER) && defined(_WCHAR_T_DEFINED) && defined(_NATIVE_WCHAR_T_DEFINED)
+
+inline size_t utf16EncodeRune(uint32_t rune, wchar_t *encoded)
+{
+	return utf16EncodeRune(rune, reinterpret_cast<uint16_t *>(encoded));
+}
+
+inline const wchar_t *utf16DecodeRune(const wchar_t *s, size_t nElem, uint32_t *rune)
+{
+	const uint16_t *ret;
+
+	ret = utf16DecodeRune(reinterpret_cast<const uint16_t *>(s), nElem, rune);
+	return reinterpret_cast<const wchar_t *>(ret);
+}
+
+inline size_t utf16RuneCount(const wchar_t *s, size_t nElem)
+{
+	return utf16RuneCount(reinterpret_cast<const uint16_t *>(s), nElem);
+}
+
+inline size_t utf16UTF8Count(const wchar_t *s, size_t nElem)
+{
+	return utf16UTF8Count(reinterpret_cast<const uint16_t *>(s), nElem);
+}
+
+#endif
+
 #endif

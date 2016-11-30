@@ -107,6 +107,22 @@ size_t utf16UTF8Count(const uint16_t *s, size_t nElem);
 
 If `nElem` is 0, `utf16UTF8Count()` stops at a `L'\0'` (which is not included in the count); otherwise, it stops after `nElem` elements.
 
+### `wchar_t` Overloads
+```c++
+inline size_t utf16EncodeRune(uint32_t rune, wchar_t *encoded);
+inline const wchar_t *utf16DecodeRune(const wchar_t *s, size_t nElem, uint32_t *rune);
+inline size_t utf16RuneCount(const wchar_t *s, size_t nElem);
+inline size_t utf16UTF8Count(const wchar_t *s, size_t nElem);
+```
+
+These overloads are provided
+
+* if you are using Microsoft's Visual Studio C++ compilers
+* if you are using C++, **and**
+* if you specified that `wchar_t` should be a distinct type (the default)
+
+These overloads transparently handle `wchar_t *` and `uint16_t *` being incompatible under all of the above conditions for you. There is no other difference.
+
 ## Contributing
 Welcome.
 
@@ -116,7 +132,6 @@ Welcome.
 - Add a utf8RuneEncodedLength()/utf16RuneEncodedLength()?
 - Add a utf16IsSurrogate()? utfValidRune()? named rune constants?
 - Fix remaining MSVC warnings
-- Is `wchar_t` on MSVC signed? Because I need to cast to use these functions on a `WCHAR`
 - Write a real test suite sometime
 - Figure out the best way to make this eligible for https://github.com/nothings/single_file_libs#new-libraries-and-corrections-1 (can the license go at the bottom of the .c file? should it, for any other person ever? I've never dealt with file preambles before so I'm not sure what the subtleties are)
 
