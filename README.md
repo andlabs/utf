@@ -118,6 +118,7 @@ Welcome.
 - Fix remaining MSVC warnings
 - Is `wchar_t` on MSVC signed? Because I need to cast to use these functions on a `WCHAR`
 - Write a real test suite sometime
+- Figure out the best way to make this eligible for https://github.com/nothings/single_file_libs#new-libraries-and-corrections-1 (can the license go at the bottom of the .c file? should it, for any other person ever? I've never dealt with file preambles before so I'm not sure what the subtleties are)
 
 ## Background
 This came about when I was planning the text event system of [libui](https://github.com/andlabs/libui). Windows and OS X both use UTF-16 for its internal string data types; however, libui uses UTF-8 for all text strings. I got away with it so far because I either only needed to convert entire strings or I decided to use grapheme cluster boundaries instead of byte or codepoint offsets. However, this broke apart with the text handling system, since I have to allow attributed strings to be manipulated after they were made. Therefore, I needed to be able to build tables of mappings between UTF-8 byte offsets and UTF-16 array indices. Building such loops with OS-specific APIs introduces a number of pain points, such as what to do about API error codes and what to do about invalid byte sequences.
