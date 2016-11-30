@@ -18,8 +18,8 @@ extern const uint16_t *asciiDecodeUTF16;
 extern const uint16_t *jpDecodeUTF16;
 extern const uint16_t *emojiDecodeUTF16;
 
-extern benchFunc portableFuncFor(int i);
-extern benchFunc systemFuncFor(int i);
+extern const benchFunc *portableBenchFuncs;
+extern const benchFunc *systemBenchFuncs;
 
 enum {
 	BenchmarkUTF8RuneCountASCIIBuf,

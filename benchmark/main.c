@@ -78,20 +78,15 @@ int main(void)
 	int i;
 
 	for (i = 0; items[i].name != NULL; i++) {
-		items[i].portable = portableFuncFor(i);
-		items[i].system = systemFuncFor(i);
-	}
-
-	for (i = 0; items[i].name != NULL; i++) {
 		uint16_t nsec;
 
 		printf("Portable %-50s ", items[i].name);
-		nsec = bench(items[i].portable);
+		nsec = bench(portableBenchFuncs[i]);
 		printTime(nsec);
 		printf("/op\n");
 		printf("System   %-50s ", items[i].name);
-		if (items[i].system != NULL) {
-			nsec = bench(items[i].system);
+		if (systemBenchFuncs[i] != NULL) {
+			nsec = bench(systemBenchFuncs[i]);
 			printTime(nsec);
 			printf("/op\n");
 		} else
