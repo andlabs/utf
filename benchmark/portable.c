@@ -47,7 +47,7 @@ static void portableBenchmarkUTF8RuneCountEmojiBuf(int64_t n)
 	}
 }
 
-static void portableBenchmarkUTF8UTF16CountJPBuf(int64_t n)
+static void portableBenchmarkUTF8UTF16CountEmojiBuf(int64_t n)
 {
 	int64_t i;
 
@@ -101,7 +101,7 @@ static void portableBenchmarkUTF16RuneCountEmojiBuf(int64_t n)
 	}
 }
 
-static void portableBenchmarkUTF16UTF8CountJPBuf(int64_t n)
+static void portableBenchmarkUTF16UTF8CountEmojiBuf(int64_t n)
 {
 	int64_t i;
 
@@ -206,7 +206,7 @@ static void portableBenchmarkUTF16DecodeRuneASCII(int64_t n)
 	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
-		utf16DeocdeRune(asciiDecodeUTF16, 0, &rune);
+		utf16DecodeRune(asciiDecodeUTF16, 0, &rune);
 	}
 }
 
@@ -236,13 +236,13 @@ const benchFunc portableBenchFuncs[] = {
 	portableBenchmarkUTF8RuneCountJPBuf,
 	portableBenchmarkUTF8UTF16CountJPBuf,
 	portableBenchmarkUTF8RuneCountEmojiBuf,
-	portableBenchmarkUTF8UTF16CountJPBuf,
+	portableBenchmarkUTF8UTF16CountEmojiBuf,
 	portableBenchmarkUTF16RuneCountASCIIBuf,
 	portableBenchmarkUTF16UTF8CountASCIIBuf,
 	portableBenchmarkUTF16RuneCountJPBuf,
 	portableBenchmarkUTF16UTF8CountJPBuf,
 	portableBenchmarkUTF16RuneCountEmojiBuf,
-	portableBenchmarkUTF16UTF8CountJPBuf,
+	portableBenchmarkUTF16UTF8CountEmojiBuf,
 	portableBenchmarkUTF8EncodeRuneASCII,
 	portableBenchmarkUTF8EncodeRuneJP,
 	portableBenchmarkUTF8EncodeRuneEmoji,

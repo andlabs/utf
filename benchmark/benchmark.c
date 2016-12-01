@@ -1,4 +1,5 @@
 // 30 november 2016
+#include <string.h>
 #include "benchmark.h"
 
 // TODO we could probably make this portable
@@ -42,7 +43,7 @@ static int64_t timePerOp(B *b)
 {
 	if (b->n <= 0)
 		return 0;
-	return b.duration / b->n;
+	return b->duration / b->n;
 }
 
 static void runN(B *b, int64_t n)
@@ -63,7 +64,8 @@ int64_t bench(benchFunc f)
 	int64_t n;
 
 	memset(&b, 0, sizeof (B));
-	b->oneSecond = benchOneSecond();
+	b.f = f;
+	b.oneSecond = benchOneSecond();
 
 	// first iteration
 	n = 1;
@@ -86,5 +88,5 @@ int64_t bench(benchFunc f)
 		runN(&b, n);
 	}
 
-	return benchTimeToNsec(b->duration) / b->n;
+	return benchTimeToNsec(b.duration) / b.n;
 }

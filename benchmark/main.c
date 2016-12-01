@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include "common.h"
 
+// TODO make this just a list of strings
 struct item {
 	const char *name;
 	benchFunc portable;
@@ -16,13 +17,13 @@ static struct item items[] = {
 	{ "BenchmarkUTF8RuneCountJPBuf", NULL, NULL },
 	{ "BenchmarkUTF8UTF16CountJPBuf", NULL, NULL },
 	{ "BenchmarkUTF8RuneCountEmojiBuf", NULL, NULL },
-	{ "BenchmarkUTF8UTF16CountJPBuf", NULL, NULL },
+	{ "BenchmarkUTF8UTF16CountEmojiBuf", NULL, NULL },
 	{ "BenchmarkUTF16RuneCountASCIIBuf", NULL, NULL },
 	{ "BenchmarkUTF16UTF8CountASCIIBuf", NULL, NULL },
 	{ "BenchmarkUTF16RuneCountJPBuf", NULL, NULL },
 	{ "BenchmarkUTF16UTF8CountJPBuf", NULL, NULL },
 	{ "BenchmarkUTF16RuneCountEmojiBuf", NULL, NULL },
-	{ "BenchmarkUTF16UTF8CountJPBuf", NULL, NULL },
+	{ "BenchmarkUTF16UTF8CountEmojiBuf", NULL, NULL },
 	{ "BenchmarkUTF8EncodeRuneASCII", NULL, NULL },
 	{ "BenchmarkUTF8EncodeRuneJP", NULL, NULL },
 	{ "BenchmarkUTF8EncodeRuneEmoji", NULL, NULL },
@@ -48,7 +49,7 @@ void printTime(int64_t nsec)
 		return;
 	}
 	if (nsec < 1000) {
-		printf("%" PRIU64 "ns", nsec);
+		printf("%" PRIu64 "ns", nsec);
 		return;
 	}
 	if (nsec < 1000000) {
@@ -64,11 +65,11 @@ void printTime(int64_t nsec)
 	hours = nsec / 3600000000000;
 	nsec %= 3600000000000;
 	if (hours != 0)
-		printf("%" PRIU64 "h", hours);
+		printf("%" PRIu64 "h", hours);
 	minutes = nsec / 60000000000;
 	nsec %= 60000000000;
 	if (minutes != 0)
-		printf("%" PRIU64 "m", minutes);
+		printf("%" PRIu64 "m", minutes);
 	d = ((double) nsec) / 1000000000;
 	printf("%.9gs", d);
 }

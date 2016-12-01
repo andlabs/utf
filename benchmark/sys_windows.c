@@ -15,7 +15,7 @@ int64_t benchCurrentTime(void)
 {
 	LARGE_INTEGER qpc;
 
-	QueryPerformanceFrequency(&qpc);
+	QueryPerformanceCounter(&qpc);
 	return qpc.QuadPart;
 }
 
@@ -24,7 +24,7 @@ int64_t benchOneSecond(void)
 	LARGE_INTEGER qpf;
 
 	// this is in ticks per second, and the default maximum time is one second, so.
-	QueryPerformanceCounter(&qpf);
+	QueryPerformanceFrequency(&qpf);
 	return qpf.QuadPart;
 }
 
@@ -88,7 +88,7 @@ static void systemBenchmarkUTF8RuneCountEmojiBuf(int64_t n)
 	}
 }
 
-static void systemBenchmarkUTF8UTF16CountJPBuf(int64_t n)
+static void systemBenchmarkUTF8UTF16CountEmojiBuf(int64_t n)
 {
 	int64_t i;
 
@@ -142,7 +142,7 @@ static void systemBenchmarkUTF16RuneCountEmojiBuf(int64_t n)
 	}
 }
 
-static void systemBenchmarkUTF16UTF8CountJPBuf(int64_t n)
+static void systemBenchmarkUTF16UTF8CountEmojiBuf(int64_t n)
 {
 	int64_t i;
 
@@ -265,13 +265,13 @@ const benchFunc systemBenchFuncs[] = {
 	systemBenchmarkUTF8RuneCountJPBuf,
 	systemBenchmarkUTF8UTF16CountJPBuf,
 	systemBenchmarkUTF8RuneCountEmojiBuf,
-	systemBenchmarkUTF8UTF16CountJPBuf,
+	systemBenchmarkUTF8UTF16CountEmojiBuf,
 	systemBenchmarkUTF16RuneCountASCIIBuf,
 	systemBenchmarkUTF16UTF8CountASCIIBuf,
 	systemBenchmarkUTF16RuneCountJPBuf,
 	systemBenchmarkUTF16UTF8CountJPBuf,
 	systemBenchmarkUTF16RuneCountEmojiBuf,
-	systemBenchmarkUTF16UTF8CountJPBuf,
+	systemBenchmarkUTF16UTF8CountEmojiBuf,
 	systemBenchmarkUTF8EncodeRuneASCII,
 	systemBenchmarkUTF8EncodeRuneJP,
 	systemBenchmarkUTF8EncodeRuneEmoji,
