@@ -2,117 +2,117 @@
 #include "../utf.h"
 #include "common.h"
 
-static void portableBenchmarkUTF8RuneCountASCIIBuf(uint64_t n)
+static void portableBenchmarkUTF8RuneCountASCIIBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf8RuneCount(asciiBufUTF8, 0);
 	}
 }
 
-static void portableBenchmarkUTF8UTF16CountASCIIBuf(uint64_t n)
+static void portableBenchmarkUTF8UTF16CountASCIIBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf8UTF16Count(asciiBufUTF8, 0);
 	}
 }
 
-static void portableBenchmarkUTF8RuneCountJPBuf(uint64_t n)
+static void portableBenchmarkUTF8RuneCountJPBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf8RuneCount(jpBufUTF8, 0);
 	}
 }
 
-static void portableBenchmarkUTF8UTF16CountJPBuf(uint64_t n)
+static void portableBenchmarkUTF8UTF16CountJPBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf8UTF16Count(jpBufUTF8, 0);
 	}
 }
 
-static void portableBenchmarkUTF8RuneCountEmojiBuf(uint64_t n)
+static void portableBenchmarkUTF8RuneCountEmojiBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf8RuneCount(emojiBufUTF8, 0);
 	}
 }
 
-static void portableBenchmarkUTF8UTF16CountJPBuf(uint64_t n)
+static void portableBenchmarkUTF8UTF16CountJPBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf8UTF16Count(emojiBufUTF8, 0);
 	}
 }
 
-static void portableBenchmarkUTF16RuneCountASCIIBuf(uint64_t n)
+static void portableBenchmarkUTF16RuneCountASCIIBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf16RuneCount(asciiBufUTF16, 0);
 	}
 }
 
-static void portableBenchmarkUTF16UTF8CountASCIIBuf(uint64_t n)
+static void portableBenchmarkUTF16UTF8CountASCIIBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf16UTF8Count(asciiBufUTF16, 0);
 	}
 }
 
-static void portableBenchmarkUTF16RuneCountJPBuf(uint64_t n)
+static void portableBenchmarkUTF16RuneCountJPBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf16RuneCount(jpBufUTF16, 0);
 	}
 }
 
-static void portableBenchmarkUTF16UTF8CountJPBuf(uint64_t n)
+static void portableBenchmarkUTF16UTF8CountJPBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf16UTF8Count(jpBufUTF16, 0);
 	}
 }
 
-static void portableBenchmarkUTF16RuneCountEmojiBuf(uint64_t n)
+static void portableBenchmarkUTF16RuneCountEmojiBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf16RuneCount(emojiBufUTF16, 0);
 	}
 }
 
-static void portableBenchmarkUTF16UTF8CountJPBuf(uint64_t n)
+static void portableBenchmarkUTF16UTF8CountJPBuf(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 
 	for (i = 0; i < n; i++) {
 		utf16UTF8Count(emojiBufUTF16, 0);
 	}
 }
 
-static void portableBenchmarkUTF8EncodeRuneASCII(uint64_t n)
+static void portableBenchmarkUTF8EncodeRuneASCII(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	char buf[4];
 
 	for (i = 0; i < n; i++) {
@@ -120,9 +120,9 @@ static void portableBenchmarkUTF8EncodeRuneASCII(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF8EncodeRuneJP(uint64_t n)
+static void portableBenchmarkUTF8EncodeRuneJP(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	char buf[4];
 
 	for (i = 0; i < n; i++) {
@@ -130,9 +130,9 @@ static void portableBenchmarkUTF8EncodeRuneJP(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF8EncodeRuneEmoji(uint64_t n)
+static void portableBenchmarkUTF8EncodeRuneEmoji(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	char buf[4];
 
 	for (i = 0; i < n; i++) {
@@ -140,9 +140,9 @@ static void portableBenchmarkUTF8EncodeRuneEmoji(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF16EncodeRuneASCII(uint64_t n)
+static void portableBenchmarkUTF16EncodeRuneASCII(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint16_t buf[2];
 
 	for (i = 0; i < n; i++) {
@@ -150,9 +150,9 @@ static void portableBenchmarkUTF16EncodeRuneASCII(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF16EncodeRuneJP(uint64_t n)
+static void portableBenchmarkUTF16EncodeRuneJP(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint16_t buf[2];
 
 	for (i = 0; i < n; i++) {
@@ -160,9 +160,9 @@ static void portableBenchmarkUTF16EncodeRuneJP(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF16EncodeRuneEmoji(uint64_t n)
+static void portableBenchmarkUTF16EncodeRuneEmoji(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint16_t buf[2];
 
 	for (i = 0; i < n; i++) {
@@ -170,9 +170,9 @@ static void portableBenchmarkUTF16EncodeRuneEmoji(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF8DecodeRuneASCII(uint64_t n)
+static void portableBenchmarkUTF8DecodeRuneASCII(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
@@ -180,9 +180,9 @@ static void portableBenchmarkUTF8DecodeRuneASCII(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF8DecodeRuneJP(uint64_t n)
+static void portableBenchmarkUTF8DecodeRuneJP(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
@@ -190,9 +190,9 @@ static void portableBenchmarkUTF8DecodeRuneJP(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF8DecodeRuneEmoji(uint64_t n)
+static void portableBenchmarkUTF8DecodeRuneEmoji(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
@@ -200,9 +200,9 @@ static void portableBenchmarkUTF8DecodeRuneEmoji(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF16DecodeRuneASCII(uint64_t n)
+static void portableBenchmarkUTF16DecodeRuneASCII(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
@@ -210,9 +210,9 @@ static void portableBenchmarkUTF16DecodeRuneASCII(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF16DecodeRuneJP(uint64_t n)
+static void portableBenchmarkUTF16DecodeRuneJP(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
@@ -220,9 +220,9 @@ static void portableBenchmarkUTF16DecodeRuneJP(uint64_t n)
 	}
 }
 
-static void portableBenchmarkUTF16DecodeRuneEmoji(uint64_t n)
+static void portableBenchmarkUTF16DecodeRuneEmoji(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	uint32_t rune;
 
 	for (i = 0; i < n; i++) {

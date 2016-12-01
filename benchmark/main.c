@@ -38,10 +38,10 @@ static struct item items[] = {
 	{ NULL, NULL, NULL },
 };
 
-void printTime(uint64_t nsec)
+void printTime(int64_t nsec)
 {
 	double d;
-	uint64_t hours, minutes;
+	int64_t hours, minutes;
 
 	if (nsec == 0) {
 		printf("0s");

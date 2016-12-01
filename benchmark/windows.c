@@ -1,21 +1,46 @@
 // 30 november 2016
-// headers here
-// change any definition to #define name NULL if it should not be defined
+#define UNICODE
+#define _UNICODE
+#define STRICT
+#define STRICT_TYPED_ITEMIDS
+#define WINVER			0x0501
+#define _WIN32_WINNT		0x0501
+#define _WIN32_WINDOWS	0x0501
+#define _WIN32_IE			0x0600
+#define NTDDI_VERSION		0x05010000
+#include <windows.h>
 #include "common.h"
 
 int64_t benchCurrentTime(void)
 {
-	// code here
+	LARGE_INTEGER qpc;
+
+	QueryPerformanceFrequency(&qpc);
+	return qpc.QuadPart;
 }
 
 int64_t benchOneSecond(void)
 {
-	// code here
+	LARGE_INTEGER qpf;
+
+	// this is in ticks per second, and the default maximum time is one second, so.
+	QueryPerformanceCounter(&qpf);
+	return qpf.QuadPart;
 }
 
 int64_t benchTimeToNsec(int64_t c)
 {
-	// code here
+	int64_t res;
+
+	// convert duration from counts to nanocounts
+	res = c * 1000000000;
+
+	// and convert from nanocounts to naonseconds
+	// benchOneSecond() only calls QueryPerformanceFrequency() so let's just use it directly
+	// thanks to ValleyBell for help
+	res /= benchOneSecond();
+
+	return res;
 }
 
 static void systemBenchmarkUTF8RuneCountASCIIBuf(int64_t n)

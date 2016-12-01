@@ -1,5 +1,4 @@
 // 30 november 2016
-#include "windows.h"
 #include "benchmark.h"
 
 // TODO we could probably make this portable
@@ -8,8 +7,8 @@ typedef struct B B;
 
 struct B {
 	benchFunc f;
-	LARGE_INTEGER duration;
-	LARGE_INTEGER qpf;
+	int64_t duration;
+	int64_t oneSecond;
 	int64_t n;
 };
 
@@ -39,48 +38,45 @@ static int64_t roundUp(int64_t n)
 	return 10 * base;
 }
 
-static int64_t qpcPerOp(B *b)
+static int64_t timePerOp(B *b)
 {
 	if (b->n <= 0)
 		return 0;
-	return b.duration.QuadPart / b->n;
+	return b.duration / b->n;
 }
 
 static void runN(B *b, int64_t n)
 {
-	LARGE_INTEGER start, end;
+	int64_t start, end;
 
 	b->n = n;
-	b->duration.QuadPart = 0;
-	QueryPerformanceCounter(&start);
+	b->duration = 0;
+	start = benchCurrentTime();
 	(*(b->f))(b->n);
-	QueryPerformanceCounter(&end);
-	b->duration.QuadPart += end.QuadPart - start.QuadPart;
+	end = benchCurrentTime();
+	b->duration += end - start;
 }
 
-uint64_t bench(benchFunc f)
+int64_t bench(benchFunc f)
 {
 	B b;
-	LARGE_INTEGER qpf;
 	int64_t n;
-	uint64_t res;
 
-	ZeroMemory(&b, sizeof (B));
-	// this is in ticks per second, and the default maximum time is per second, so.
-	QueryPerformanceFrequency(&(b.qpf));
+	memset(&b, 0, sizeof (B));
+	b->oneSecond = benchOneSecond();
 
 	// first iteration
 	n = 1;
 	runN(&b, n);
 
 	// and benchmark
-	while (b.duration.QuadPart < b.qpf.QuadPart && n < 1000000000) {
+	while (b.duration < b.oneSecond && n < 1000000000) {
 		int64_t prevN;
 
 		prevN = n;
-		n = b.qpf.QuadPart;
-		if (qpcPerOp(&b) != 0)
-			n /= qpcPerOp(&b);
+		n = b.oneSecond;
+		if (timePerOp(&b) != 0)
+			n /= timePerOp(&b);
 		n = n + (n / 5);			// 1.2x increase each time...
 		if (n >= 100 * prevN)		// ...unless we went too fast...
 			n = 100 * prevN;
@@ -90,14 +86,5 @@ uint64_t bench(benchFunc f)
 		runN(&b, n);
 	}
 
-	// now convert duration from counts to nanocounts
-	res = b->duration.QuadPart;
-	res *= 1000000000;
-
-	// and convert from nanocounts to seconds == naonseconds
-	// thanks to ValleyBell for help
-	res /= b->qpf.QuadPart;
-
-	// and finally from nanoseconds for all to nanoseconds per one
-	return res / b->n;
+	return benchTimeToNsec(b->duration) / b->n;
 }
