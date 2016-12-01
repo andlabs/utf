@@ -43,6 +43,11 @@ int64_t benchTimeToNsec(int64_t c)
 	return res;
 }
 
+void init(void)
+{
+	// TODO call benchOneSecond() here
+}
+
 static void systemBenchmarkUTF8RuneCountASCIIBuf(int64_t n)
 {
 	int64_t i;

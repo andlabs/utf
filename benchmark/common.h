@@ -21,6 +21,8 @@ extern const uint16_t emojiDecodeUTF16[];
 extern const benchFunc portableBenchFuncs[];
 extern const benchFunc systemBenchFuncs[];
 
+extern void init(void);
+
 enum {
 	BenchmarkUTF8RuneCountASCIIBuf,
 	BenchmarkUTF8UTF16CountASCIIBuf,

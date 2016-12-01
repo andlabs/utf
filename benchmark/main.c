@@ -78,6 +78,7 @@ int main(void)
 {
 	int i;
 
+	init();
 	for (i = 0; items[i].name != NULL; i++) {
 		uint16_t nsec;
 

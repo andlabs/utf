@@ -1,21 +1,36 @@
 // 30 november 2016
-// headers here
-// change any definition to #define name NULL if it should not be defined
-#include "common.h"
+#import <Cocoa/Cocoa.h>
+#import <mach/mach.h>
+#import <mach/mach_time.h>
+#import "common.h"
 
 int64_t benchCurrentTime(void)
 {
-	// code here
+	return (int64_t) mach_absolute_time();
 }
 
 int64_t benchOneSecond(void)
 {
-	// code here
+	mach_timebase_info_data_t mt;
+	int64_t num, den;
+
+	// should not fail; see http://stackoverflow.com/questions/31450517/what-are-the-possible-return-values-for-mach-timebase-info
+	// also true on 10.12 at least: https://opensource.apple.com/source/xnu/xnu-3789.1.32/libsyscall/wrappers/mach_timebase_info.c.auto.html + https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/clock.c.auto.html
+	mach_timebase_info(&mt);
+	num = (int64_t) (mt.numer);
+	den = (int64_t) (mt.denom);
+	return ((int64_t) 1000000000) * den / num;
 }
 
 int64_t benchTimeToNsec(int64_t c)
 {
-	// code here
+	mach_timebase_info_data_t mt;
+	int64_t num, den;
+
+	mach_timebase_info(&mt);
+	num = (int64_t) (mt.numer);
+	den = (int64_t) (mt.denom);
+	return c * num / den;
 }
 
 void init(void)

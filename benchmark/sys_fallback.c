@@ -18,6 +18,11 @@ int64_t benchTimeToNsec(int64_t c)
 	return c / CLOCKS_PER_SEC;
 }
 
+void init(void)
+{
+	// do nothing
+}
+
 #define systemBenchmarkUTF8RuneCountASCIIBuf NULL
 
 #define systemBenchmarkUTF8UTF16CountASCIIBuf NULL
