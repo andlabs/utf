@@ -80,17 +80,26 @@ int main(void)
 
 	init();
 	for (i = 0; items[i].name != NULL; i++) {
-		uint16_t nsec;
+		uint16_t nsec, pnsec;
 
 		printf("Portable %-50s ", items[i].name);
 		nsec = bench(portableBenchFuncs[i]);
 		printTime(nsec);
 		printf("/op\n");
+		pnsec = nsec;
+
 		printf("System   %-50s ", items[i].name);
 		if (systemBenchFuncs[i] != NULL) {
 			nsec = bench(systemBenchFuncs[i]);
 			printTime(nsec);
-			printf("/op\n");
+			printf("/op (");
+			if (nsec == pnsec)
+				printf("the same");
+			else if (nsec < pnsec)
+				printf("faster");
+			else
+				printf("slower");
+			printf(")\n");
 		} else
 			printf("undefined\n");
 	}
