@@ -33,9 +33,27 @@ int64_t benchTimeToNsec(int64_t c)
 	return c * num / den;
 }
 
+static NSString *asciiBufUTF16NS;
+static NSString *jpBufUTF16NS;
+static NSString *emojiBufUTF16NS;
+
+static NSString *utf16StrToNS(const uint16_t *s)
+{
+	const uint16_t *t;
+
+	t = s;
+	while (*t)
+		t++;
+	return [[NSString alloc] initWithCharactersNoCopy:s
+		length:(t - s)
+		freeWhenDone:NO];
+}
+
 void init(void)
 {
-	// code here
+	asciiBufUTF16NS = utf16StrToNS(asciiBufUTF16);
+	jpBufUTF16NS = utf16StrToNS(jpBufUTF16);
+	emojiBufUTF16NS = utf16StrToNS(emojiBufUTF16);
 }
 
 static void systemBenchmarkUTF8RuneCountASCIIBuf(int64_t n)
@@ -106,7 +124,7 @@ static void systemBenchmarkUTF16UTF8CountASCIIBuf(int64_t n)
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		[asciiBufUTF16NS lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
 	}
 }
 
@@ -124,7 +142,7 @@ static void systemBenchmarkUTF16UTF8CountJPBuf(int64_t n)
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		[jpBufUTF16NS lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
 	}
 }
 
@@ -142,7 +160,7 @@ static void systemBenchmarkUTF16UTF8CountEmojiBuf(int64_t n)
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		[emojiBufUTF16NS lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
 	}
 }
 
