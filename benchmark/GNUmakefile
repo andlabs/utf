@@ -25,15 +25,23 @@ endif
 ifeq ($(MSVC),1)
 
 CFLAGS += \
-	xxx
+	-W4 \
+	-wd4100 \
+	-TC \
+	-bigobj -nologo \
+	-RTC1 -RTCs -RTCu
 
 LDFLAGS += \
-	xxxx \
+	-largeaddressaware -nologo -incremental:no \
 	kernel32.lib
 
 CC = cl
 
+CCOUTOPT = -Fo:
+
 LD = link
+
+LDOUTOPT = -out:
 
 else
 
@@ -52,7 +60,11 @@ else ifeq ($(SYS),windows)
 LDFLAGS += -lkernel32
 endif
 
+CCOUTOPT = -o
+
 LD = $(CC)
+
+LDOUTOPT = -o
 
 endif
 
@@ -67,16 +79,16 @@ OFILES = \
 	$(MFILES:%.m=%.o)
 
 $(OUT): $(OFILES)
-	$(LD) -o$(OUT) $(OFILES) $(LDFLAGS)
+	$(LD) $(LDOUTOPT)$(OUT) $(OFILES) $(LDFLAGS)
 
 utf.o: ../utf.c $(HFILES)
-	$(CC) -c -o$@ $< $(CFLAGS)
+	$(CC) -c $(CCOUTOPT)$@ $< $(CFLAGS)
 
 %.o: %.c $(HFILES)
-	$(CC) -c -o$@ $< $(CFLAGS)
+	$(CC) -c $(CCOUTOPT)$@ $< $(CFLAGS)
 
 %.o: %.m $(HFILES)
-	$(CC) -c -o$@ $< $(MFLAGS)
+	$(CC) -c $(CCOUTOPT)$@ $< $(MFLAGS)
 
 clean:
 	rm -f $(OUT) $(OFILES)
