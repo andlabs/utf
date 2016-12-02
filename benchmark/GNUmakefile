@@ -14,10 +14,14 @@ CFILES = \
 	main.c \
 	portable.c
 
+CXXFILES =
+
 MFILES =
 
 ifeq ($(SYS),darwin)
 MFILES += sys_$(SYS).m
+else ifeq ($(SYS),cpp11)
+CXXFILES += sys_$(SYS).cpp
 else
 CFILES += sys_$(SYS).c
 endif
@@ -31,6 +35,13 @@ CFLAGS += \
 	-bigobj -nologo \
 	-RTC1 -RTCs -RTCu
 
+CXXFLAGS += \
+	-W4 \
+	-wd4100 \
+	-TP \
+	-bigobj -nologo \
+	-RTC1 -RTCs -RTCu
+
 LDFLAGS += \
 	-largeaddressaware -nologo -incremental:no \
 	kernel32.lib
@@ -38,6 +49,8 @@ LDFLAGS += \
 CC = cl
 
 CCOUTOPT = -Fo:
+
+CXX = cl
 
 LD = link
 
@@ -48,11 +61,19 @@ else
 CFLAGS += \
 	-Wall -Wextra -pedantic --std=c99
 
+CXXFLAGS += \
+	-Wall -Wextra -pedantic --std=c++11
+
 MFLAGS += \
 	-Wall -Wextra -pedantic --std=c99
 
 LDFLAGS += \
-	-Wall -Wextra -pedantic --std=c99
+	-Wall -Wextra -pedantic
+ifeq ($(SYS),cpp11)
+LDFLAGS += --std=c++11
+else
+LDFLAGS += --std=c99
+endif
 
 ifeq ($(SYS),darwin)
 LDFLAGS += -framework Foundation -framework AppKit
@@ -68,6 +89,10 @@ LDOUTOPT = -o
 
 endif
 
+ifeq ($(SYS),cpp11)
+LD = $(CXX)
+endif
+
 HFILES = \
 	../utf.h \
 	benchmark.h \
@@ -76,6 +101,7 @@ HFILES = \
 OFILES = \
 	utf.o \
 	$(CFILES:%.c=%.o) \
+	$(CXXFILES:%.cpp=%.o) \
 	$(MFILES:%.m=%.o)
 
 $(OUT): $(OFILES)
@@ -86,6 +112,9 @@ utf.o: ../utf.c $(HFILES)
 
 %.o: %.c $(HFILES)
 	$(CC) -c $(CCOUTOPT)$@ $< $(CFLAGS)
+
+%.o: %.cpp $(HFILES)
+	$(CXX) -c $(CCOUTOPT)$@ $< $(CXXFLAGS)
 
 %.o: %.m $(HFILES)
 	$(CC) -c $(CCOUTOPT)$@ $< $(MFLAGS)
