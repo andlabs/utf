@@ -14,7 +14,7 @@ extern "C" {
 // this is a benchmark; prefer steadiness (TODO does Go?)
 // don't do this check at runtime every time
 // the extra template is to deal with MSVC 2013
-template<class Unused> using steadyClockT = typename std::conditional<
+template<typename Unused> using steadyClockT = typename std::conditional<
 	std::chrono::high_resolution_clock::is_steady,
 	std::chrono::high_resolution_clock,
 	std::chrono::steady_clock>::type;
