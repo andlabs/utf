@@ -90,7 +90,9 @@ LDOUTOPT = -o
 endif
 
 ifeq ($(SYS),cpp11)
+ifneq ($(MSVC),1)
 LD = $(CXX)
+endif
 endif
 
 HFILES = \

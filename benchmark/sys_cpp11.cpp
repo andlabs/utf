@@ -13,15 +13,17 @@ extern "C" {
 // the high resolution clock does not need to be steady
 // this is a benchmark; prefer steadiness (TODO does Go?)
 // don't do this check at runtime every time
-using steadyClock = typename std::conditional<
+// the extra template is to deal with MSVC 2013
+template<class Unused> using steadyClockT = typename std::conditional<
 	std::chrono::high_resolution_clock::is_steady,
 	std::chrono::high_resolution_clock,
 	std::chrono::steady_clock>::type;
+using steadyClock = steadyClockT<int>;
 
 int64_t benchCurrentTime(void)
 {
-	typename steadyClock::time_point now;
-	typename steadyClock::time_point::duration d;
+	steadyClock::time_point now;
+	steadyClock::time_point::duration d;
 
 	now = steadyClock::now();
 	d = now.time_since_epoch();
