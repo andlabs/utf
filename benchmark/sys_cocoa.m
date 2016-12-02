@@ -39,6 +39,15 @@ static size_t emojiBufLen = 0;
 static NSString *asciiBufUTF16NS;
 static NSString *jpBufUTF16NS;
 static NSString *emojiBufUTF16NS;
+static uint32_t encodeASCIIUTF32[1] = { encodeASCII };
+static uint32_t encodeJPUTF32[1] = { encodeJP };
+static uint32_t encodeEmojiUTF32[1] = { encodeEmoji };
+static NSString *asciiDecodeUTF8NS;
+static NSString *jpDecodeUTF8NS;
+static NSString *emojiDecodeUTF8NS;
+static NSString *asciiDecodeUTF16NS;
+static NSString *jpDecodeUTF16NS;
+static NSString *emojiDecodeUTF16NS;
 
 static NSString *utf16StrToNS(const uint16_t *s)
 {
@@ -50,6 +59,15 @@ static NSString *utf16StrToNS(const uint16_t *s)
 	// silence compiler about constness
 	return [[NSString alloc] initWithCharactersNoCopy:((unichar *) s)
 		length:(t - s)
+		freeWhenDone:NO];
+}
+
+static NSString *utf8NoCopy(const char *buf, size_t n)
+{
+	// silence compiler about constness
+	return [[NSString alloc] initWithBytesNoCopy:((void *) buf)
+		length:n
+		encoding:NSUTF8StringEncoding
 		freeWhenDone:NO];
 }
 
@@ -71,19 +89,24 @@ void init(void)
 	jpBufUTF16NS = utf16StrToNS(jpBufUTF16);
 	emojiBufUTF16NS = utf16StrToNS(emojiBufUTF16);
 
+	asciiDecodeUTF8NS = utf8NoCopy(asciiDecodeUTF8, 1);
+	jpDecodeUTF8NS = utf8NoCopy(jpDecodeUTF8, 3);
+	emojiDecodeUTF8NS = utf8NoCopy(emojiDecodeUTF8, 4);
+
+	asciiDecodeUTF16NS = [[NSString alloc] initWithCharactersNoCopy:((unichar *) asciiDecodeUTF16)
+		length:1
+		freeWhenDone:NO];
+	jpDecodeUTF16NS = [[NSString alloc] initWithCharactersNoCopy:((unichar *) jpDecodeUTF16)
+		length:1
+		freeWhenDone:NO];
+	emojiDecodeUTF16NS = [[NSString alloc] initWithCharactersNoCopy:((unichar *) emojiDecodeUTF16)
+		length:2
+		freeWhenDone:NO];
+
 	if ([@"hello" lengthOfBytesUsingEncoding:NSUTF8StringEncoding] == 0)
 		printf("** -[NSString lengthOfBytesUsingEncoding:NSUTF8StringEncoding] unsupported; some benchmarks might give wrong results");
 	if ([@"hello" lengthOfBytesUsingEncoding:NSUTF32StringEncoding] == 0)
 		printf("** -[NSString lengthOfBytesUsingEncoding:NSUTF32StringEncoding] unsupported; some benchmarks might give wrong results");
-}
-
-static NSString *utf8NoCopy(const char *buf, size_t n)
-{
-	// silence compiler about constness
-	return [[NSString alloc] initWithBytesNoCopy:((void *) buf)
-		length:n
-		encoding:NSUTF8StringEncoding
-		freeWhenDone:NO];
 }
 
 static void systemBenchmarkUTF8RuneCountASCIIBuf(int64_t n)
@@ -195,39 +218,20 @@ static void systemBenchmarkUTF16UTF8CountEmojiBuf(int64_t n)
 	}
 }
 
-static void systemBenchmarkUTF8EncodeRuneASCII(int64_t n)
-{
-	int64_t i;
+#define systemBenchmarkUTF8EncodeRuneASCII NULL
 
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF8EncodeRuneJP NULL
 
-static void systemBenchmarkUTF8EncodeRuneJP(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
-
-static void systemBenchmarkUTF8EncodeRuneEmoji(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF8EncodeRuneEmoji NULL
 
 static void systemBenchmarkUTF16EncodeRuneASCII(int64_t n)
 {
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		[[NSString alloc] initWithBytes:((void *) encodeASCIIUTF32)
+			length:4
+			encoding:NSUTF32StringEncoding];
 	}
 }
 
@@ -236,7 +240,9 @@ static void systemBenchmarkUTF16EncodeRuneJP(int64_t n)
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		[[NSString alloc] initWithBytes:((void *) encodeJPUTF32)
+			length:4
+			encoding:NSUTF32StringEncoding];
 	}
 }
 
@@ -245,61 +251,111 @@ static void systemBenchmarkUTF16EncodeRuneEmoji(int64_t n)
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		[[NSString alloc] initWithBytes:((void *) encodeEmojiUTF32)
+			length:4
+			encoding:NSUTF32StringEncoding];
 	}
 }
 
 static void systemBenchmarkUTF8DecodeRuneASCII(int64_t n)
 {
 	int64_t i;
+	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO check failure
+		[asciiDecodeUTF8NS getBytes:&rune
+			maxLength:4
+			usedLength:NULL
+			encoding:NSUTF32StringEncoding
+			options:0
+			range:NSMakeRange(0, 1)
+			remainingRange:NULL];
 	}
 }
 
 static void systemBenchmarkUTF8DecodeRuneJP(int64_t n)
 {
 	int64_t i;
+	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO check failure
+		[jpDecodeUTF8NS getBytes:&rune
+			maxLength:4
+			usedLength:NULL
+			encoding:NSUTF32StringEncoding
+			options:0
+			range:NSMakeRange(0, 3)
+			remainingRange:NULL];
 	}
 }
 
 static void systemBenchmarkUTF8DecodeRuneEmoji(int64_t n)
 {
 	int64_t i;
+	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO check failure
+		[emojiDecodeUTF8NS getBytes:&rune
+			maxLength:4
+			usedLength:NULL
+			encoding:NSUTF32StringEncoding
+			options:0
+			range:NSMakeRange(0, 4)
+			remainingRange:NULL];
 	}
 }
 
 static void systemBenchmarkUTF16DecodeRuneASCII(int64_t n)
 {
 	int64_t i;
+	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO check failure
+		[asciiDecodeUTF16NS getBytes:&rune
+			maxLength:4
+			usedLength:NULL
+			encoding:NSUTF32StringEncoding
+			options:0
+			range:NSMakeRange(0, 1)
+			remainingRange:NULL];
 	}
 }
 
 static void systemBenchmarkUTF16DecodeRuneJP(int64_t n)
 {
 	int64_t i;
+	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO check failure
+		[jpDecodeUTF16NS getBytes:&rune
+			maxLength:4
+			usedLength:NULL
+			encoding:NSUTF32StringEncoding
+			options:0
+			range:NSMakeRange(0, 1)
+			remainingRange:NULL];
 	}
 }
 
 static void systemBenchmarkUTF16DecodeRuneEmoji(int64_t n)
 {
 	int64_t i;
+	uint32_t rune;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO check failure
+		[emojiDecodeUTF16NS getBytes:&rune
+			maxLength:4
+			usedLength:NULL
+			encoding:NSUTF32StringEncoding
+			options:0
+			range:NSMakeRange(0, 2)
+			remainingRange:NULL];
 	}
 }
 
