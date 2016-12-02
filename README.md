@@ -8,7 +8,7 @@
 
 `utf` is intended to have fully defined and consistent behavior across platforms, including graceful handling of invalid input (so no error codes!).
 
-On the flipside, this means `utf` might not perform optimally. I have yet to run benchmarks, though.
+On the flipside, this means `utf` might not perform optimally. It should, however, run fast enough for virtually every use. I've provided benchmarks for you to judge for yourself with; see below.
 
 The design of `utf` is based on Go's `unicode/utf8` and `unicode/utf16` packages, however it does not use any of Go's code.
 
@@ -122,6 +122,9 @@ These overloads are provided
 * if you specified that `wchar_t` should be a distinct type (the default)
 
 These overloads transparently handle `wchar_t *` and `uint16_t *` being incompatible under all of the above conditions for you. There is no other difference.
+
+## Benchmarks
+The `benchmark/` folder contains benchmarks you can use not only to evaluate utf's performance, but also to compare utf's performance against other libraries. At minimum, you'll need GNU make to build the benchmarks. See the comments at the top of `GNUmakefile` for details.
 
 ## Contributing
 Welcome.

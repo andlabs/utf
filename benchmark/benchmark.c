@@ -2,7 +2,8 @@
 #include <string.h>
 #include "benchmark.h"
 
-// TODO we could probably make this portable
+// this is based on Go's package testing (but again, does not use Go's code, apart from function names)
+// TODO allow stopping and starting
 
 typedef struct B B;
 
