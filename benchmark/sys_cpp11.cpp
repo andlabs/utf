@@ -31,6 +31,10 @@ int64_t benchTimeToNsec(int64_t c)
 	return c;		// already nanoseconds
 }
 
+static std::codecvt_utf8_utf16<char16_t> cvtUTF8UTF16;
+static std::codecvt_utf8<char32_t> cvtUTF8Rune;
+static std::codecvt_utf16<char32_t> cvtUTF16Rune;
+
 void init(void)
 {
 	// code here
