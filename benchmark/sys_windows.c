@@ -11,6 +11,8 @@
 #include <windows.h>
 #include "common.h"
 
+static int64_t qpf;
+
 int64_t benchCurrentTime(void)
 {
 	LARGE_INTEGER qpc;
@@ -21,11 +23,8 @@ int64_t benchCurrentTime(void)
 
 int64_t benchOneSecond(void)
 {
-	LARGE_INTEGER qpf;
-
 	// this is in ticks per second, and the default maximum time is one second, so.
-	QueryPerformanceFrequency(&qpf);
-	return qpf.QuadPart;
+	return qpf;
 }
 
 int64_t benchTimeToNsec(int64_t c)
@@ -36,233 +35,130 @@ int64_t benchTimeToNsec(int64_t c)
 	res = c * 1000000000;
 
 	// and convert from nanocounts to naonseconds
-	// benchOneSecond() only calls QueryPerformanceFrequency() so let's just use it directly
 	// thanks to ValleyBell for help
-	res /= benchOneSecond();
+	res /= qpf;
 
 	return res;
 }
 
 void init(void)
 {
-	// TODO call benchOneSecond() here
+	LARGE_INTEGER qpfli;
+
+	QueryPerformanceFrequency(&qpfli);
+	qpf = qpfli.QuadPart;
 }
 
-static void systemBenchmarkUTF8RuneCountASCIIBuf(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF8RuneCountASCIIBuf NULL
 
 static void systemBenchmarkUTF8UTF16CountASCIIBuf(int64_t n)
 {
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO errors
+		MultiByteToWideChar(CP_UTF8, 0,
+			asciiBufUTF8, -1,
+			NULL, 0);
 	}
 }
 
-static void systemBenchmarkUTF8RuneCountJPBuf(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF8RuneCountJPBuf NULL
 
 static void systemBenchmarkUTF8UTF16CountJPBuf(int64_t n)
 {
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO errors
+		MultiByteToWideChar(CP_UTF8, 0,
+			jpBufUTF8, -1,
+			NULL, 0);
 	}
 }
 
-static void systemBenchmarkUTF8RuneCountEmojiBuf(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF8RuneCountEmojiBuf NULL
 
 static void systemBenchmarkUTF8UTF16CountEmojiBuf(int64_t n)
 {
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO errors
+		MultiByteToWideChar(CP_UTF8, 0,
+			emojiBufUTF8, -1,
+			NULL, 0);
 	}
 }
 
-static void systemBenchmarkUTF16RuneCountASCIIBuf(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF16RuneCountASCIIBuf NULL
 
 static void systemBenchmarkUTF16UTF8CountASCIIBuf(int64_t n)
 {
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO errors
+		WideCharToMultiByte(CP_UTF8, 0,
+			asciiBufUTF16, -1,
+			NULL, 0,
+			NULL, NULL);
 	}
 }
 
-static void systemBenchmarkUTF16RuneCountJPBuf(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF16RuneCountJPBuf NULL
 
 static void systemBenchmarkUTF16UTF8CountJPBuf(int64_t n)
 {
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO errors
+		WideCharToMultiByte(CP_UTF8, 0,
+			jpBufUTF16, -1,
+			NULL, 0,
+			NULL, NULL);
 	}
 }
 
-static void systemBenchmarkUTF16RuneCountEmojiBuf(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF16RuneCountEmojiBuf NULL
 
 static void systemBenchmarkUTF16UTF8CountEmojiBuf(int64_t n)
 {
 	int64_t i;
 
 	for (i = 0; i < n; i++) {
-		// code here
+		// TODO errors
+		WideCharToMultiByte(CP_UTF8, 0,
+			emojiBufUTF16, -1,
+			NULL, 0,
+			NULL, NULL);
 	}
 }
 
-static void systemBenchmarkUTF8EncodeRuneASCII(int64_t n)
-{
-	int64_t i;
+#define systemBenchmarkUTF8EncodeRuneASCII NULL
 
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF8EncodeRuneJP NULL
 
-static void systemBenchmarkUTF8EncodeRuneJP(int64_t n)
-{
-	int64_t i;
+#define systemBenchmarkUTF8EncodeRuneEmoji NULL
 
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF16EncodeRuneASCII NULL
 
-static void systemBenchmarkUTF8EncodeRuneEmoji(int64_t n)
-{
-	int64_t i;
+#define systemBenchmarkUTF16EncodeRuneJP NULL
 
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF16EncodeRuneEmoji NULL
 
-static void systemBenchmarkUTF16EncodeRuneASCII(int64_t n)
-{
-	int64_t i;
+#define systemBenchmarkUTF8DecodeRuneASCII NULL
 
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF8DecodeRuneJP NULL
 
-static void systemBenchmarkUTF16EncodeRuneJP(int64_t n)
-{
-	int64_t i;
+#define systemBenchmarkUTF8DecodeRuneEmoji NULL
 
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF16DecodeRuneASCII NULL
 
-static void systemBenchmarkUTF16EncodeRuneEmoji(int64_t n)
-{
-	int64_t i;
+#define systemBenchmarkUTF16DecodeRuneJP NULL
 
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
-
-static void systemBenchmarkUTF8DecodeRuneASCII(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
-
-static void systemBenchmarkUTF8DecodeRuneJP(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
-
-static void systemBenchmarkUTF8DecodeRuneEmoji(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
-
-static void systemBenchmarkUTF16DecodeRuneASCII(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
-
-static void systemBenchmarkUTF16DecodeRuneJP(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
-
-static void systemBenchmarkUTF16DecodeRuneEmoji(int64_t n)
-{
-	int64_t i;
-
-	for (i = 0; i < n; i++) {
-		// code here
-	}
-}
+#define systemBenchmarkUTF16DecodeRuneEmoji NULL
 
 const benchFunc systemBenchFuncs[] = {
 	systemBenchmarkUTF8RuneCountASCIIBuf,
