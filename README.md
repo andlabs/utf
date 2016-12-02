@@ -109,19 +109,18 @@ If `nElem` is 0, `utf16UTF8Count()` stops at a `L'\0'` (which is not included in
 
 ### `wchar_t` Overloads
 ```c++
-inline size_t utf16EncodeRune(uint32_t rune, wchar_t *encoded);
-inline const wchar_t *utf16DecodeRune(const wchar_t *s, size_t nElem, uint32_t *rune);
-inline size_t utf16RuneCount(const wchar_t *s, size_t nElem);
-inline size_t utf16UTF8Count(const wchar_t *s, size_t nElem);
+inline size_t utf16EncodeRune(uint32_t rune, __wchar_t *encoded);
+inline const __wchar_t *utf16DecodeRune(const __wchar_t *s, size_t nElem, uint32_t *rune);
+inline size_t utf16RuneCount(const __wchar_t *s, size_t nElem);
+inline size_t utf16UTF8Count(const __wchar_t *s, size_t nElem);
 ```
 
 These overloads are provided
 
-* if you are using Microsoft's Visual Studio C++ compilers
-* if you are using C++, **and**
-* if you specified that `wchar_t` should be a distinct type (the default)
+* if you are using Microsoft's Visual Studio C++ compilers **and**
+* if you are using C++
 
-These overloads transparently handle `wchar_t *` and `uint16_t *` being incompatible under all of the above conditions for you. There is no other difference.
+These overloads transparently handle `wchar_t *` and `uint16_t *` being incompatible under all of the above conditions for you. There is no other difference. This extends to Windows API-specific types like `WCHAR *` that are aliases for `wchar_t *`. (The use of `__wchar_t` allows this to work even if `wchar_t` being a distinct type is turned off. This is fully documented in various places on MSDN.)
 
 ## Benchmarks
 The `benchmark/` folder contains benchmarks you can use not only to evaluate utf's performance, but also to compare utf's performance against other libraries. At minimum, you'll need GNU make to build the benchmarks. See the comments at the top of `GNUmakefile` for details.
